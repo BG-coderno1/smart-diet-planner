@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Analyze Meals You Ate</h3>
+<form method="post" action="{{ url_for('analyze_meals_route') }}">
+  <div class="mb-3">
+    <label>Describe your meals (e.g. "2 eggs, 1 slice toast, 1 cup milk")</label>
+    <textarea class="form-control" name="meal_text" rows="4"></textarea>
+  </div>
+  <button class="btn btn-primary" type="submit">Analyze</button>
+</form>
+
+{% if result %}
+  <hr />
+  {% if result.error %}
+    <div class="alert alert-danger">{{ result.error }}</div>
+  {% else %}
+    <h5>Parsed Items</h5>
+    <ul>
+      {% for it in result.parsed_items %}
+        <li>{{ it.name }} — {{ it.calories }} cal, Protein: {{ it.protein_g }}g, Carbs: {{ it.carbs_g }}g, Fat: {{ it.fat_g }}g</li>
+      {% endfor %}
+    </ul>
+
+    <h5>Totals</h5>
+    <p>Calories: {{ result.totals.calories }} | Protein: {{ result.totals.protein_g }}g | Carbs: {{ result.totals.carbs_g }}g | Fat: {{ result.totals.fat_g }}g</p>
+
+    {% if result.deficits %}
+      <h5>Deficits (vs typical targets)</h5>
+      <ul>
+        {% for k, v in result.deficits.items() %}
+          <li>{{ k }}: {{ v|round(1) }}</li>
+        {% endfor %}
+      </ul>
+
+      <h5>Suggestions</h5>
+      <ul>
+        {% for s in result.suggestions %}
+          <li>{{ s }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endif %}
+{% endif %}
+{% endblock %}

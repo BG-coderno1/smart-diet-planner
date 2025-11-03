@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<h3>Diet Plan</h3>
+{% if bmi %}
+  <p><strong>BMI:</strong> {{ bmi }}</p>
+{% endif %}
+{% if plan.error %}
+  <div class="alert alert-danger">Error loading plan: {{ plan.error }}</div>
+{% else %}
+  <h5>Targets</h5>
+  <p>Calories: {{ plan.targets.calories }} | Protein: {{ plan.targets.protein }}g | Carbs: {{ plan.targets.carbs }}g | Fat: {{ plan.targets.fat }}g</p>
+
+  <h5>Meals</h5>
+{% for m in plan.meals %}
+  <div class="card mb-2">
+    <div class="card-body">
+      <h6>
+        Meal {{ m.meal_index }} 
+        (Totals: {{ m.totals.cal }} cal, {{ m.totals.protein }}g protein)
+      </h6>
+      <ul>
+        {% for key, value in m.items() %}
+          <li>{{ key }}: {{ value }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endfor %}
+
+  <h5>Aggregate</h5>
+  <p>{{ plan.aggregate.calories }} cal | Protein: {{ plan.aggregate.protein }}g | Carbs: {{ plan.aggregate.carbs }}g | Fat: {{ plan.aggregate.fat }}g</p>
+{% endif %}
+{% endblock %}

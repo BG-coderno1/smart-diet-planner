@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-3 text-center">Meal Analyzer 🍽️</h2>
+  <form method="POST" class="border p-4 rounded shadow-sm bg-light">
+    <div class="mb-3">
+      <label for="num_meals" class="form-label fw-bold">Number of Meals:</label>
+      <select id="num_meals" name="num_meals" class="form-select" required>
+        {% for i in range(1, 6) %}
+        <option value="{{ i }}">{{ i }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div id="meal_sections"></div>
+
+    <button type="submit" class="btn btn-primary mt-3 w-100">Analyze Nutrition 🔍</button>
+  </form>
+
+  {% if result %}
+  <div class="mt-4">
+    {% if result.error %}
+      <div class="alert alert-danger">{{ result.error }}</div>
+    {% else %}
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title">🍱 Selected Items</h5>
+          <p><strong>Foods:</strong> {{ result.foods | join(', ') }}</p>
+          {% if result.drinks %}
+          <p><strong>Drinks:</strong> {{ result.drinks | join(', ') }}</p>
+          {% endif %}
+          <hr>
+          <h5>📊 Nutritional Summary</h5>
+          <ul>
+            <li>Calories: {{ result.totals.calories or 0 | round(2) }}</li>
+            <li>Protein: {{ result.totals.protein or 0 | round(2) }} g</li>
+            <li>Carbs: {{ result.totals.carbs or 0 | round(2) }} g</li>
+            <li>Fat: {{ result.totals.fat or 0 | round(2) }} g</li>
+          </ul>
+
+          {% if result.suggestions %}
+          <div class="alert alert-info mt-3">
+            <strong>Suggestions:</strong>
+            <ul>
+              {% for s in result.suggestions %}
+              <li>{{ s }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+<script id="foods-data" type="application/json">{{ all_foods|tojson|safe }}</script>
+<script id="meal-types-data" type="application/json">{{ meal_types|tojson|safe }}</script>
+
+<script>
+const foods = JSON.parse(document.getElementById('foods-data').textContent);
+const mealTypes = JSON.parse(document.getElementById('meal-types-data').textContent);
+const container = document.getElementById('meal_sections');
+const numMealsSelect = document.getElementById('num_meals');
+
+function createSelect(name) {
+  const select = document.createElement('select');
+  select.name = name;
+  select.className = 'form-select mb-2';
+  select.innerHTML = `
+    <option value="">-- Select Food --</option>
+    ${foods.map(f => `<option value="${f}">${f}</option>`).join('')}
+  `;
+  return select;
+}
+
+function createDrinkSelect(name) {
+  const select = document.createElement('select');
+  select.name = name;
+  select.className = 'form-select mb-2';
+  select.innerHTML = `
+    <option value="">-- Select Drink --</option>
+    ${foods.map(f => `<option value="${f}">${f}</option>`).join('')}
+  `;
+  return select;
+}
+
+function renderMeals(n) {
+  container.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const div = document.createElement('div');
+    div.className = 'border p-3 mt-3 rounded bg-white shadow-sm';
+
+    // Add meal type, foods, and drinks
+    div.innerHTML = `
+      <h5 class="fw-semibold mb-2">Meal ${i + 1}</h5>
+      <div class="mb-2">
+        <label class="form-label">Meal Type</label>
+        <select name="meal_type_${i}" class="form-select">
+          ${mealTypes.map(t => `<option value="${t}">${t}</option>`).join('')}
+        </select>
+      </div>
+      <div class="mb-2">
+        <label class="form-label">Foods</label>
+        <div id="food-container-${i}">
+          <select name="meal_food_${i}[]" class="form-select mb-2">
+            <option value="">-- Select Food --</option>
+            ${foods.map(f => `<option value="${f}">${f}</option>`).join('')}
+          </select>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-success" onclick="addFood(${i})">+ Add another food</button>
+      </div>
+      <div class="mb-2">
+        <label class="form-label">Drinks</label>
+        <div id="drink-container-${i}">
+          <select name="meal_drink_${i}[]" class="form-select mb-2">
+            <option value="">-- Select Drink --</option>
+            ${foods.map(f => `<option value="${f}">${f}</option>`).join('')}
+          </select>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-success" onclick="addDrink(${i})">+ Add another drink</button>
+      </div>
+    `;
+    container.appendChild(div);
+  }
+}
+
+function addFood(mealIndex) {
+  const container = document.getElementById(`food-container-${mealIndex}`);
+  const newSelect = createSelect(`meal_food_${mealIndex}[]`);
+  container.appendChild(newSelect);
+}
+
+function addDrink(mealIndex) {
+  const container = document.getElementById(`drink-container-${mealIndex}`);
+  const newSelect = createDrinkSelect(`meal_drink_${mealIndex}[]`);
+  container.appendChild(newSelect);
+}
+
+numMealsSelect.addEventListener('change', e => renderMeals(e.target.value));
+renderMeals(1); // Default one meal
+</script>
+{% endblock %}
