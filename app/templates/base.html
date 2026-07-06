@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Smart Diet Planner{% endblock %}</title>
+  <meta name="description" content="Plan Indian meals, analyze nutrition, and scan food photos with Smart Diet Planner." />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to content</a>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="{{ url_for('diet.index') }}">Smart Diet<span class="dot">.</span></a>
+      <nav aria-label="Primary">
+        <ul class="nav-links">
+          {% if current_user.is_authenticated %}
+            <li><a href="{{ url_for('diet.dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('diet.create_plan') }}">Create Plan</a></li>
+            <li><a href="{{ url_for('meals.analyze_meals') }}">Analyze Meals</a></li>
+            <li><a href="{{ url_for('meals.meal_logging') }}">Log a Meal</a></li>
+            <li><a href="{{ url_for('vision.scan_photo') }}">Scan Photo</a></li>
+            <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
+          {% else %}
+            <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+            <li><a href="{{ url_for('auth.register') }}" class="active">Register</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <div class="container-app mt-3">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else category }}" role="alert">
+              <span>{{ message }}</span>
+              <button type="button" class="alert-close" data-alert-close aria-label="Dismiss">&times;</button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container-app flex-between">
+      <span>Smart Diet Planner — built for smarter, personalized nutrition.</span>
+      <span>Data: Indian Food Nutrition dataset</span>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

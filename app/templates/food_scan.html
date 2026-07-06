@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Scan a Photo — Smart Diet Planner{% endblock %}
+{% block content %}
+<h1 style="font-size:2rem;">Scan a food photo</h1>
+<p class="text-muted mb-3">
+  Upload a photo of your plate and the vision engine will suggest likely dishes and estimate nutrition.
+</p>
+
+<form method="post" enctype="multipart/form-data" novalidate>
+  {{ form.hidden_tag() }}
+  <div class="dropzone" id="dropzone">
+    {{ form.photo(id="photo-input") }}
+    <p id="dropzone-label" style="margin-bottom:4px; font-weight:600;">Click or drag a photo here</p>
+    <p class="text-muted" style="margin:0; font-size:0.85rem;">JPG, PNG, or WEBP · up to 8 MB</p>
+    <img id="photo-preview" alt="Selected food photo preview">
+  </div>
+  {% for e in form.photo.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+  <button type="submit" class="btn btn-accent mt-3">Analyze photo</button>
+</form>
+
+{% if analysis %}
+<div class="mt-4">
+  {% if analysis.error %}
+    <div class="alert alert-danger">{{ analysis.error }}</div>
+  {% else %}
+    {% if analysis.note %}
+      <div class="alert alert-info">{{ analysis.note }}</div>
+    {% endif %}
+
+    <div class="pill pill-accent mb-2">Engine: {{ analysis.backend_used | upper }}</div>
+
+    {% if analysis.totals_estimate %}
+      <div class="nutrition-panel mb-3">
+        <div class="np-title">Estimated Nutrition</div>
+        <div class="np-sub">Based on the best-matched dish(es)</div>
+        <div class="np-row np-major"><span class="np-label">Calories</span><span class="np-value">{{ analysis.totals_estimate.calories }} kcal</span></div>
+        <div class="np-row"><span class="np-label">Protein</span><span class="np-value">{{ analysis.totals_estimate.protein }} g</span></div>
+        <div class="np-row"><span class="np-label">Carbohydrates</span><span class="np-value">{{ analysis.totals_estimate.carbs }} g</span></div>
+        <div class="np-row"><span class="np-label">Fat</span><span class="np-value">{{ analysis.totals_estimate.fat }} g</span></div>
+      </div>
+    {% endif %}
+
+    <h2>What the engine saw</h2>
+    {% for pred in analysis.predictions %}
+      <div class="card-flat mb-2">
+        <div class="flex-between">
+          <strong style="text-transform:capitalize;">{{ pred.label }}</strong>
+          <span class="pill">{{ (pred.confidence * 100) | round(0) }}% confidence</span>
+        </div>
+        {% if pred.matched_foods %}
+          <div class="mt-1">
+            {% for f in pred.matched_foods %}
+              <span class="pill">{{ f.name }} &middot; {{ f.calories }} kcal</span>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted mt-1" style="margin-bottom:0;">No specific dish matched in the database.</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

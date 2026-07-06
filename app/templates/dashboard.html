@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Smart Diet Planner{% endblock %}
+{% block content %}
+<div class="flex-between mb-3">
+  <div>
+    <h1 style="font-size:2rem;">Welcome, {{ current_user.name }}</h1>
+    <p class="text-muted">Here's where your diet plans live.</p>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div>
+    <h2>Your plans</h2>
+    {% if plans %}
+      <div class="card">
+        {% for p in plans %}
+          <div class="plan-row">
+            <div>
+              <div class="plan-name">{{ p.name }}</div>
+              <div class="plan-meta">{{ p.meals_count }} meals &middot; {{ p.target_calories }} kcal target &middot; created {{ p.created_at.strftime('%d %b %Y') }}</div>
+            </div>
+            <div class="plan-actions">
+              <a class="btn btn-outline btn-sm" href="{{ url_for('diet.view_plan', plan_id=p.id) }}">View</a>
+              <form action="{{ url_for('diet.delete_plan', plan_id=p.id) }}" method="POST" style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-danger btn-sm"
+                        onclick="return confirm('Delete this plan? This cannot be undone.');">
+                  Delete
+                </button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <h3>No plans yet</h3>
+        <p>Create your first personalized diet plan in under a minute.</p>
+        <a class="btn btn-primary" href="{{ url_for('diet.create_plan') }}">Create a plan</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <div>
+    <h2>Quick actions</h2>
+    <div class="card-flat flex" style="flex-direction:column; gap:12px;">
+      <a class="btn btn-primary btn-block" href="{{ url_for('diet.create_plan') }}">Create diet plan</a>
+      <a class="btn btn-outline btn-block" href="{{ url_for('meals.analyze_meals') }}">Analyze meals</a>
+      <a class="btn btn-outline btn-block" href="{{ url_for('meals.meal_logging') }}">Log a meal (text)</a>
+      <a class="btn btn-accent btn-block" href="{{ url_for('vision.scan_photo') }}">Scan a food photo</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Smart Diet Planner — Personalized Indian Nutrition{% endblock %}
+{% block content %}
+<section class="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-eyebrow">Nutrition, read like a label</div>
+      <h1>Know exactly<br>what's on your plate.</h1>
+      <p style="font-size:1.1rem; max-width:520px;">
+        Build meal plans against your calorie and macro targets, analyze what
+        you've eaten from over 1,000 Indian dishes, or just snap a photo of
+        your plate and let the scanner do the reading.
+      </p>
+      <div class="hero-cta">
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Get started free</a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Login</a>
+      </div>
+    </div>
+
+    <div class="label-sample" aria-hidden="true">
+      <div class="nutrition-panel" style="max-width:none;">
+        <div class="np-title">Today's Plate</div>
+        <div class="np-sub">Sample meal — Masala Dosa + Sambar</div>
+        <div class="np-row np-major">
+          <span class="np-label">Calories</span>
+          <span class="np-value">312 kcal</span>
+        </div>
+        <div class="np-row"><span class="np-label">Protein</span><span class="np-value">8.4 g</span></div>
+        <div class="np-row"><span class="np-label">Carbohydrates</span><span class="np-value">41.2 g</span></div>
+        <div class="np-row"><span class="np-label">Fat</span><span class="np-value">11.6 g</span></div>
+        <div class="np-row"><span class="np-label">Fibre</span><span class="np-value">3.1 g</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <h2 class="text-center mb-3">Three ways to stay on target</h2>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-num">01</div>
+      <h3>Create a plan</h3>
+      <p>Set your calorie and macro targets and get a full meal-by-meal plan pulled from real Indian dishes, not generic filler foods.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">02</div>
+      <h3>Analyze what you ate</h3>
+      <p>Pick items from over 1,000 dishes, or just describe your meal in plain text — either way you get an instant nutrition breakdown.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">03</div>
+      <h3>Scan a photo</h3>
+      <p>Snap your plate and the vision engine identifies likely dishes and estimates the nutrition, no manual entry needed.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

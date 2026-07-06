@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}{{ code }} — Smart Diet Planner{% endblock %}
+{% block content %}
+<div class="empty-state mt-4">
+  <div class="hero-eyebrow">Error {{ code }}</div>
+  <h1 style="font-size:2.2rem;">Something didn't go to plan.</h1>
+  <p>{{ message }}</p>
+  <a class="btn btn-primary" href="{{ url_for('diet.index') }}">Back to home</a>
+</div>
+{% endblock %}
