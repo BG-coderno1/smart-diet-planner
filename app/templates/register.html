@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Register — Smart Diet Planner{% endblock %}
+{% block content %}
+<div class="auth-wrap">
+  <div class="card">
+    <h2 class="text-center mb-3">Create your account</h2>
+    <form method="post" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="field">
+        {{ form.name.label(class_="form-label") }}
+        {{ form.name(class_="is-invalid" if form.name.errors else "") }}
+        {% for e in form.name.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="field">
+        {{ form.email.label(class_="form-label") }}
+        {{ form.email(class_="is-invalid" if form.email.errors else "") }}
+        {% for e in form.email.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="field">
+        {{ form.password.label(class_="form-label") }}
+        {{ form.password(class_="is-invalid" if form.password.errors else "") }}
+        {% for e in form.password.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="field">
+        {{ form.confirm_password.label(class_="form-label") }}
+        {{ form.confirm_password(class_="is-invalid" if form.confirm_password.errors else "") }}
+        {% for e in form.confirm_password.errors %}<div class="field-error">{{ e }}</div>{% endfor %}
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Create account</button>
+    </form>
+    <div class="auth-switch">Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a></div>
+  </div>
+</div>
+{% endblock %}

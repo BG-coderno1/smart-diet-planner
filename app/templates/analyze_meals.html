@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Analyze Meals — Smart Diet Planner{% endblock %}
+{% block content %}
+<h1 style="font-size:2rem;">Meal analyzer</h1>
+<p class="text-muted mb-3">Pick the foods and drinks in each meal for an instant nutrition breakdown.</p>
+
+<form method="POST" class="card">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <div class="field" style="max-width:220px;">
+    <label for="num_meals" class="form-label">Number of meals</label>
+    <select id="num_meals" name="num_meals">
+      {% for i in range(1, 6) %}
+      <option value="{{ i }}">{{ i }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div id="meal_sections"></div>
+
+  <button type="submit" class="btn btn-primary mt-3">Analyze nutrition</button>
+</form>
+
+{% if result %}
+<div class="mt-3">
+  {% if result.error %}
+    <div class="alert alert-danger">{{ result.error }}</div>
+  {% else %}
+    <div class="grid-2">
+      <div class="nutrition-panel">
+        <div class="np-title">Nutrition Summary</div>
+        <div class="np-sub">{{ result.foods | length }} item(s) analyzed</div>
+        <div class="np-row np-major"><span class="np-label">Calories</span><span class="np-value">{{ result.totals.calories }} kcal</span></div>
+        <div class="np-row"><span class="np-label">Protein</span><span class="np-value">{{ result.totals.protein }} g</span></div>
+        <div class="np-row"><span class="np-label">Carbohydrates</span><span class="np-value">{{ result.totals.carbs }} g</span></div>
+        <div class="np-row"><span class="np-label">Fat</span><span class="np-value">{{ result.totals.fat }} g</span></div>
+      </div>
+
+      <div class="card-flat">
+        <h3>Items</h3>
+        {% for item in result.foods %}
+          <span class="pill">{{ item.name }} &middot; {{ item.calories }} kcal
+            {% if item.match_confidence < 1.0 %}<span class="text-muted">(closest match)</span>{% endif %}
+          </span>
+        {% endfor %}
+
+        {% if result.unmatched %}
+          <div class="alert alert-warning mt-2" style="margin-bottom:0;">
+            Couldn't find a match for: {{ result.unmatched | join(', ') }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if result.suggestions %}
+    <div class="alert alert-info mt-2">
+      <div>
+        <strong>Suggestions</strong>
+        <ul style="margin:6px 0 0 18px; padding:0;">
+          {% for s in result.suggestions %}
+          <li>{{ s }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    {% endif %}
+  {% endif %}
+</div>
+{% endif %}
+
+<script id="foods-data" type="application/json">{{ all_foods | tojson | safe }}</script>
+<script id="meal-types-data" type="application/json">{{ meal_types | tojson | safe }}</script>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const foods = JSON.parse(document.getElementById('foods-data').textContent);
+const mealTypes = JSON.parse(document.getElementById('meal-types-data').textContent);
+const container = document.getElementById('meal_sections');
+const numMealsSelect = document.getElementById('num_meals');
+
+function optionsHtml(placeholder) {
+  return `<option value="">-- ${placeholder} --</option>` +
+    foods.map(f => `<option value="${f}">${f}</option>`).join('');
+}
+
+function renderMeals(n) {
+  container.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const div = document.createElement('div');
+    div.className = 'meal-card mt-3';
+    div.innerHTML = `
+      <h3>Meal ${i + 1}</h3>
+      <div class="field">
+        <label class="form-label">Meal type</label>
+        <select name="meal_type_${i}">
+          ${mealTypes.map(t => `<option value="${t}">${t}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label class="form-label">Foods</label>
+        <div id="food-container-${i}">
+          <select name="meal_food_${i}[]" class="mt-1">${optionsHtml('Select food')}</select>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm mt-1" data-add-food="${i}">+ Add another food</button>
+      </div>
+      <div class="field">
+        <label class="form-label">Drinks</label>
+        <div id="drink-container-${i}">
+          <select name="meal_drink_${i}[]" class="mt-1">${optionsHtml('Select drink')}</select>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm mt-1" data-add-drink="${i}">+ Add another drink</button>
+      </div>
+    `;
+    container.appendChild(div);
+  }
+}
+
+container.addEventListener('click', (e) => {
+  const foodIdx = e.target.getAttribute('data-add-food');
+  const drinkIdx = e.target.getAttribute('data-add-drink');
+  if (foodIdx !== null) {
+    const holder = document.getElementById(`food-container-${foodIdx}`);
+    const sel = document.createElement('select');
+    sel.name = `meal_food_${foodIdx}[]`;
+    sel.className = 'mt-1';
+    sel.innerHTML = optionsHtml('Select food');
+    holder.appendChild(sel);
+  }
+  if (drinkIdx !== null) {
+    const holder = document.getElementById(`drink-container-${drinkIdx}`);
+    const sel = document.createElement('select');
+    sel.name = `meal_drink_${drinkIdx}[]`;
+    sel.className = 'mt-1';
+    sel.innerHTML = optionsHtml('Select drink');
+    holder.appendChild(sel);
+  }
+});
+
+numMealsSelect.addEventListener('change', (e) => renderMeals(e.target.value));
+renderMeals(1);
+</script>
+{% endblock %}

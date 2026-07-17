@@ -1,0 +1,32 @@
+# Core web framework
+Flask==3.0.3
+Werkzeug==3.0.4
+
+# Database
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.7
+psycopg2-binary==2.9.9   # Postgres driver; safe to remove if only ever using SQLite
+
+# Auth & forms
+Flask-Login==0.6.3
+Flask-WTF==1.2.1
+email-validator==2.2.0
+
+# Security & ops
+Flask-Limiter==3.8.0
+python-dotenv==1.0.1
+gunicorn==22.0.0
+
+# Data / ML (classical CV backend — works with no extra setup)
+pandas==2.2.2
+numpy==1.26.4
+opencv-python-headless==4.10.0.84
+scikit-learn==1.5.1
+
+# Optional deep-learning CV backend (real per-dish photo recognition).
+# Not required for the app to run — install these only if you want to train
+# and use the fine-tuned MobileNetV3 model in app/ml/vision_deep.py:
+#
+# torch==2.4.0
+# torchvision==0.19.0
+# pillow==10.4.0

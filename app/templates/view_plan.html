@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}{{ plan_name }} — Smart Diet Planner{% endblock %}
+{% block content %}
+<h1 style="font-size:2rem;">{{ plan_name }}</h1>
+
+{% if plan.get('error') %}
+  <div class="alert alert-danger">Error loading plan: {{ plan.error }}</div>
+{% else %}
+
+  {% if plan.data_source_unavailable %}
+    <div class="alert alert-warning">
+      <span>The nutrition database wasn't available when this plan was generated, so meal items couldn't be filled in. Targets below are still accurate.</span>
+    </div>
+  {% endif %}
+
+  <div class="grid-2 mb-3">
+    <div class="nutrition-panel">
+      <div class="np-title">Daily Targets</div>
+      <div class="np-sub">{% if bmi %}Estimated BMI: {{ bmi }}{% endif %}</div>
+      <div class="np-row np-major"><span class="np-label">Calories</span><span class="np-value">{{ plan.targets.calories }} kcal</span></div>
+      <div class="np-row"><span class="np-label">Protein</span><span class="np-value">{{ plan.targets.protein }} g</span></div>
+      <div class="np-row"><span class="np-label">Carbohydrates</span><span class="np-value">{{ plan.targets.carbs }} g</span></div>
+      <div class="np-row"><span class="np-label">Fat</span><span class="np-value">{{ plan.targets.fat }} g</span></div>
+    </div>
+
+    <div class="nutrition-panel">
+      <div class="np-title">Plan Aggregate</div>
+      <div class="np-sub">What this plan actually adds up to</div>
+      <div class="np-row np-major"><span class="np-label">Calories</span><span class="np-value">{{ plan.aggregate.calories }} kcal</span></div>
+      <div class="np-row"><span class="np-label">Protein</span><span class="np-value">{{ plan.aggregate.protein }} g</span></div>
+      <div class="np-row"><span class="np-label">Carbohydrates</span><span class="np-value">{{ plan.aggregate.carbs }} g</span></div>
+      <div class="np-row"><span class="np-label">Fat</span><span class="np-value">{{ plan.aggregate.fat }} g</span></div>
+    </div>
+  </div>
+
+  <h2>Meals</h2>
+  {% for m in plan.meals %}
+    <div class="meal-card mb-2">
+      <div class="meal-card-header">
+        <div class="flex" style="align-items:center; gap:12px;">
+          <span class="meal-index-badge">{{ m.meal_index }}</span>
+          <strong>Meal {{ m.meal_index }}</strong>
+        </div>
+        <span class="text-muted">{{ m.totals.calories }} kcal &middot; {{ m.totals.protein }}g protein</span>
+      </div>
+
+      {% if m.foods %}
+        <div class="mb-2">
+          {% for item in m.foods %}
+            <span class="pill">{{ item.name }} &middot; {{ item.calories }} kcal</span>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted">No specific dishes could be filled in for this meal.</p>
+      {% endif %}
+
+      <div class="row-grid" style="grid-template-columns: repeat(4, 1fr);">
+        {% for key, icon in [('calories','Calories'), ('protein','Protein'), ('carbs','Carbs'), ('fat','Fat')] %}
+          <div>
+            <div class="flex-between" style="font-size:0.8rem;">
+              <span>{{ icon }}</span>
+              <span class="text-muted">{{ m.totals[key] }} / {{ m.targets[key] }}</span>
+            </div>
+            <div class="macro-bar-track">
+              <div class="macro-bar-fill {{ key }}" style="width: {{ [ (m.totals[key] / m.targets[key] * 100) if m.targets[key] else 0, 100] | min }}%;"></div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+{% endif %}
+{% endblock %}
